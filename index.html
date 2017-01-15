@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Geolocation</title>
+    <title>Around Me</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link rel="stylesheet" href="style.css" type="text/css"/>
@@ -12,33 +12,9 @@
 <div id="controls">
     <label for="places">Search for places</label>
     <select id="places" multiple data-placholder="Select..." class="chosen-select" placeholder="Select...">
-        <option value></option>
-        <option value="accounting">Accounting</option>
-        <option value="airport">Airport</option>
-        <option value="amusement_park">Amusement Park</option>
-        <option value="aquarium">Aquarium</option>
-        <option value="art_gallery">Art Gallery</option>
-        <option value="atm">ATM</option>
-        <option value="bakery">Bakery</option>
-        <option value="bank">Bank</option>
-        <option value="bar">Bar</option>
-        <option value="beauty_salon">Beauty Salon</option>
-        <option value="bicycle_store">Bicycle Store</option>
-        <option value="book_store">Book Store</option>
-        <option value="bowling_alley">Bowling Alley</option>
-        <option value="bus_station">Bus Station</option>
-        <option value="cafe">Cafe</option>
-        <option value="campground">Campground</option>
-        <option value="car_dealer">Car Dealer</option>
-        <option value="car_rental">Car Rental</option>
-        <option value="car_repair">Car Repair</option>
-        <option value="car_wash">Car Wash</option>
-        <option value="casino">Casino</option>
-        <option value="cemetery">Cemetery</option>
-        <option value="church">Church</option>
     </select>
     <label for="distanceRadius">in a distance of </label>
-    <input id="distanceRadius" type="number" value="1.5">
+    <input id="distanceRadius" type="number" value="1">
     <label for="distanceRadius">km.</label>
     <button id="changeSettings">Change Settings</button>
 </div>
@@ -51,6 +27,12 @@
         src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places">
 </script>
 <script>
+    var options = getDisplayNames();
+    for (var i = 0; i < options.length; i++) {
+        console.log('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
+        $("#places").append('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
+    }
+
     $(".chosen-select").chosen();
 
     $("#changeSettings").click(function () {
