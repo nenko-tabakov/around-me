@@ -1,22 +1,25 @@
-var model = {
-    "searchSettings": {
-        "distance": 1,
-        "placesTypes": []
-    }
-}
+var geocoder;
+
+var placesService;
 
 var foundPlaces = [];
 
+var currentPositionMarker;
+
+var infoWindow;
+
+var map;
+
 function initMap() {
     var defaultPosition = {lat: -34.397, lng: 150.644};
-    var map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
         center: defaultPosition,
         zoom: 12
     });
 
-    var infoWindow = new google.maps.InfoWindow({map: map});
+    infoWindow = new google.maps.InfoWindow({map: map});
 
-    var currentPositionMarker = new google.maps.Marker({
+    currentPositionMarker = new google.maps.Marker({
         position: defaultPosition,
         map: map
     });
@@ -25,18 +28,20 @@ function initMap() {
         infoWindow.open(map, marker);
     });
 
-    var geocoder = new google.maps.Geocoder;
-    var placesService = new google.maps.places.PlacesService(map);
+    geocoder = new google.maps.Geocoder;
+    placesService = new google.maps.places.PlacesService(map);
+    var addressAutocomplete = new google.maps.places.Autocomplete(document.getElementById("address"));
+    addressAutocomplete.bindTo('bounds', map);
 
     map.addListener('click', function (event) {
-        showPlaces(event.latLng, currentPositionMarker, placesService, infoWindow, geocoder, map);
+        showPlaces(event.latLng);
     });
 
     // Try HTML5 geolocation.
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
             var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            showPlaces(pos, currentPositionMarker, placesService, infoWindow, geocoder, map);
+            showPlaces(pos);
         }, function () {
             handleLocationError(true, infoWindow, map.getCenter());
         });
@@ -46,12 +51,13 @@ function initMap() {
     }
 }
 
-function geocodePosition(geocoder, map, infowindow, marker) {
-    geocoder.geocode({'location': marker.getPosition()}, function (results, status) {
+function geocodePosition() {
+    geocoder.geocode({'location': currentPositionMarker.getPosition()}, function (results, status) {
         if (status === 'OK') {
             if (results[1]) {
-                infowindow.setContent(results[1].formatted_address);
-                infowindow.open(map, marker);
+                infoWindow.setContent(results[1].formatted_address);
+                infoWindow.open(map, currentPositionMarker);
+                $("#address").val(results[1].formatted_address);
             }
         }
     });
@@ -64,18 +70,25 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
         'Error: Your browser doesn\'t support geolocation.');
 }
 
-function changeSettings() {
-    model.searchSettings.distance = $("#distanceRadius").val();
-    model.searchSettings.placesTypes = $("#places").val();
+function showPlacesByAddress() {
+    var address = $('#address').val();
+    geocoder.geocode({'address': address}, function (results, status) {
+        if (status === 'OK') {
+            var location = results[0].geometry.location;
+            showPlaces(location);
+        }
+    });
 }
 
 function searchForPlaces(placesService, marker, map) {
     clearMarkers();
-    for (var i = 0; i < model.searchSettings.placesTypes.length; i++) {
+    var placesTypes = $("#places").val();
+    var distance = $("#distanceRadius").val();
+    for (var i = 0; i < placesTypes.length; i++) {
         var request = {
             location: marker.getPosition(),
-            radius: model.searchSettings.distance * 1000,
-            type: model.searchSettings.placesTypes[i]
+            radius: distance * 1000,
+            type: placesTypes[i]
         };
         placesService.nearbySearch(request, function (results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -88,13 +101,13 @@ function searchForPlaces(placesService, marker, map) {
 
 }
 
-function showPlaces(position, currentPositionMarker, placesService, infoWindow, geocoder, map) {
+function showPlaces(position) {
     currentPositionMarker.setPosition(position);
     searchForPlaces(placesService, currentPositionMarker, map);
     infoWindow.setPosition(currentPositionMarker.getPosition());
     infoWindow.setContent("Geocoding location...");
-    geocodePosition(geocoder, map, infoWindow, currentPositionMarker);
     map.setCenter(position);
+    geocodePosition();
 }
 
 function createMarker(map, place) {

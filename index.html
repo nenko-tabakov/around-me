@@ -11,14 +11,15 @@
 
 <div id="controls">
     <label for="places">Search for places</label>
-    <select id="places" multiple data-placholder="Select..." class="chosen-select placesControl" placeholder="Select...">
+    <select id="places" multiple data-placholder="Select..." class="chosen-select placesControl"
+            placeholder="Select...">
     </select>
     <label>around</label><br>
-    <input type="text" placeholder="Address" class="placesControl">
+    <input type="text" placeholder="Address" class="placesControl" id="address">
     <label for="distanceRadius">in a distance of </label>
     <input id="distanceRadius" type="text" value="1" pattern="([0-9]*\.[0-9]+|[0-9]+)">
     <label for="distanceRadius">km.</label>
-    <button id="changeSettings" class="placesControl">Show</button>
+    <button id="showPlaces" class="placesControl">Show</button>
 </div>
 
 <div id="map"></div>
@@ -31,14 +32,13 @@
 <script>
     var options = getDisplayNames();
     for (var i = 0; i < options.length; i++) {
-        console.log('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
         $("#places").append('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
     }
 
     $(".chosen-select").chosen();
 
-    $("#changeSettings").click(function () {
-        changeSettings();
+    $("#showPlaces").click(function () {
+        showPlacesByAddress();
     });
 </script>
 </body>
