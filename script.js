@@ -32,6 +32,7 @@ function initMap() {
     placesService = new google.maps.places.PlacesService(map);
     var addressAutocomplete = new google.maps.places.Autocomplete(document.getElementById("address"));
     addressAutocomplete.bindTo('bounds', map);
+    addressAutocomplete.addListener('place_changed');
 
     map.addListener('click', function (event) {
         showPlaces(event.latLng);
@@ -80,7 +81,7 @@ function showPlacesByAddress() {
     });
 }
 
-function searchForPlaces(placesService, marker, map) {
+function searchForPlaces(marker, map) {
     clearMarkers();
     var placesTypes = $("#places").val();
     var distance = $("#distanceRadius").val();
@@ -90,20 +91,14 @@ function searchForPlaces(placesService, marker, map) {
             radius: distance * 1000,
             type: placesTypes[i]
         };
-        placesService.nearbySearch(request, function (results, status) {
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                for (var i = 0; i < results.length; i++) {
-                    createMarker(map, results[i]);
-                }
-            }
-        });
+//        nearbySearch(request);
+        radarSearch(request);
     }
-
 }
 
 function showPlaces(position) {
     currentPositionMarker.setPosition(position);
-    searchForPlaces(placesService, currentPositionMarker, map);
+    searchForPlaces(currentPositionMarker, map);
     infoWindow.setPosition(currentPositionMarker.getPosition());
     infoWindow.setContent("Geocoding location...");
     map.setCenter(position);
@@ -128,6 +123,28 @@ function clearMarkers() {
     for (var i = 0; i < foundPlaces.length; i++) {
         foundPlaces[i].setMap(null);
     }
+}
+
+function nearbySearch(request) {
+    placesService.nearbySearch(request, function (results, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            console.log("Nearby search found " + results.length);
+            for (var i = 0; i < results.length; i++) {
+                createMarker(map, results[i]);
+            }
+        }
+    });
+}
+
+function radarSearch(request) {
+    placesService.radarSearch(request, function (results, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            console.log("Radar search found " + results.length);
+            for (var i = 0; i < results.length; i++) {
+                createMarker(map, results[i]);
+            }
+        }
+    });
 }
 
 function getDisplayNames() {
@@ -253,4 +270,9 @@ function getDisplayName(val) {
 
 function capitalizeFirstLetter(val) {
     return val.charAt(0).toUpperCase() + val.slice(1);
+}
+
+function toggleControls() {
+    $("#controls").toggle();
+    $("#showControls").toggle();
 }
