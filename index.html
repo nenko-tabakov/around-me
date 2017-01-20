@@ -10,19 +10,33 @@
 <body>
 
 <div id="controls">
-    <label for="places">Search for places</label>
-    <select id="places" multiple data-placholder="Select..." class="chosen-select placesControl"
-            placeholder="Select...">
+    <label for="places">Search for</label>
+    <select id="places" multiple data-placeholder="Place types..." class="chosen-select placesControl"
+            placeholder="Place types...">
     </select>
-    <label>around</label><br>
-    <input type="text" placeholder="Address" class="placesControl" id="address">
-    <label for="distanceRadius">in a distance of </label>
+    <label for="distanceRadius">in</label>
     <input id="distanceRadius" type="text" value="1" pattern="([0-9]*\.[0-9]+|[0-9]+)">
-    <label for="distanceRadius">km.</label>
+    <label for="distanceRadius">km</label>
+    <input type="text" placeholder="Address" class="placesControl" id="address">
     <button id="showPlaces" class="placesControl">Show</button>
+    <hr>
+    <button id="advancedSettings" class="placesControl">More Search Options</button>
+    <div id="advancedSearchSettings" class="hidden">
+        <fieldset>
+            <legend>Search type</legend>
+            <input name="searchType" type="radio" value="Nearby" checked>Nearby
+            <input name="searchType" type="radio" value="Radar">Radar
+        </fieldset>
+
+        <fieldset id="markersType">
+            <legend>Show markers as</legend>
+            <input name="iconType" type="radio">Icons
+            <input name="iconType" type="radio">Photo
+        </fieldset>
+    </div>
 </div>
 
-<div id="showControls" style="display: none;">
+<div id="showControls" class="hidden">
     <label>Search Settings</label>
 </div>
 
@@ -30,24 +44,38 @@
 <script src="node_modules/jquery/dist/jquery.js"></script>
 <script src="node_modules/chosen-js/chosen.jquery.js"></script>
 <script src="script.js"></script>
-<script async defer
-        src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places">
-</script>
+<!--<script async defer-->
+        <!--src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places">-->
+<!--</script>-->
 <script>
-    var options = getDisplayNames();
-    for (var i = 0; i < options.length; i++) {
-        $("#places").append('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
-    }
+    $(document).ready(function() {
+        var options = getDisplayNames();
+        for (var i = 0; i < options.length; i++) {
+            $("#places").append('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
+        }
 
-    $(".chosen-select").chosen();
+        $(".chosen-select").chosen();
 
-    $("#showPlaces").click(function () {
-        showPlacesByAddress();
-        toggleControls();
-    });
+        $("#showPlaces").click(function () {
+            showPlacesByAddress();
+            toggleControls();
+        });
 
-    $("#showControls").click(function () {
-        toggleControls();
+        $("#showControls").click(function() {
+            toggleControls();
+        });
+
+        $("#advancedSettings").click(function() {
+            $("#advancedSearchSettings").toggle();
+        });
+
+        $("input[type=radio][name=searchType]").change(function() {
+            if (this.value == 'Radar') {
+                $("#markersType").hide();
+            } else {
+                $("#markersType").show();
+            }
+        });
     });
 </script>
 </body>
