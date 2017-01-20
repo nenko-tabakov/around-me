@@ -27,10 +27,10 @@ html, body {
     top: 5px;
     left: 50%;
     margin-left: -180px;
-    width: 350px;
+    width: 450px;
     z-index: 5;
     background-color: #fff;
-    padding: 5px;
+    padding: 7px;
     border: 1px solid #999;
 }
 
@@ -58,4 +58,12 @@ html, body {
 
 .placesControl {
     width: 98%;
+}
+
+.hidden {
+    display: none;
+}
+
+#places {
+    width: 60%;
 }
