@@ -1,82 +1,37 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Around Me</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="style.css" type="text/css"/>
-    <link rel="stylesheet" href="node_modules/chosen-js/chosen.css" type="text/css"/>
+  <title>Around Me</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles/style.css" type="text/css"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.css" rel="stylesheet" type="text/css" />
 </head>
+
 <body>
 
-<div id="controls">
+  <div id="controls">
     <label for="places">Search for</label>
     <select id="places" multiple data-placeholder="Place types..." class="chosen-select placesControl"
-            placeholder="Place types...">
-    </select>
-    <label for="distanceRadius">in</label>
-    <input id="distanceRadius" type="text" value="1" pattern="([0-9]*\.[0-9]+|[0-9]+)">
-    <label for="distanceRadius">km</label>
-    <input type="text" placeholder="Address" class="placesControl" id="address">
-    <button id="showPlaces" class="placesControl">Show</button>
-    <hr>
-    <button id="advancedSettings" class="placesControl">More Search Options</button>
-    <div id="advancedSearchSettings" class="hidden">
-        <fieldset>
-            <legend>Search type</legend>
-            <input name="searchType" type="radio" value="Nearby" checked>Nearby
-            <input name="searchType" type="radio" value="Radar">Radar
-        </fieldset>
+    placeholder="Place types...">
+  </select>
 
-        <fieldset id="markersType">
-            <legend>Show markers as</legend>
-            <input name="iconType" type="radio">Icons
-            <input name="iconType" type="radio">Photo
-        </fieldset>
-    </div>
-</div>
+  <label for="distanceRadius">in</label>
+  <input id="distanceRadius" type="text" value="1" pattern="([0-9]*\.[0-9]+|[0-9]+)">
+  <label for="distanceRadius">km around</label>
+  <input type="text" placeholder="Address" class="placesControl" id="address">
+  <button id="showPlaces" class="placesControl">Show</button>
+  </div>
 
-<div id="showControls" class="hidden">
-    <label>Search Settings</label>
-</div>
+  <div id="map"></div>
 
-<div id="map"></div>
-<script src="node_modules/jquery/dist/jquery.js"></script>
-<script src="node_modules/chosen-js/chosen.jquery.js"></script>
-<script src="script.js"></script>
-<!--<script async defer-->
-        <!--src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places">-->
-<!--</script>-->
-<script>
-    $(document).ready(function() {
-        var options = getDisplayNames();
-        for (var i = 0; i < options.length; i++) {
-            $("#places").append('<option value="' + options[i].id + '">' + options[i].displayName + '</option>');
-        }
-
-        $(".chosen-select").chosen();
-
-        $("#showPlaces").click(function () {
-            showPlacesByAddress();
-            toggleControls();
-        });
-
-        $("#showControls").click(function() {
-            toggleControls();
-        });
-
-        $("#advancedSettings").click(function() {
-            $("#advancedSearchSettings").toggle();
-        });
-
-        $("input[type=radio][name=searchType]").change(function() {
-            if (this.value == 'Radar') {
-                $("#markersType").hide();
-            } else {
-                $("#markersType").show();
-            }
-        });
-    });
-</script>
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.js"></script>
+  <script src="scripts/places_service.js"></script>
+  <script src="scripts/places_renderer.js"></script>
+  <script src="scripts/script.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places">
+  </script>
 </body>
 </html>
