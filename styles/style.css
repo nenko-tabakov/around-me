@@ -1,11 +1,7 @@
 html, body {
-  height: 99%; 
+  height: 99%;
   margin: 0;
   padding: 0;
-}
-
-#map {
-  height: 99%;
 }
 
 #controls {
@@ -20,20 +16,18 @@ html, body {
   width: 2%;
 }
 
-#showControls {
-  position: absolute;
-  top: 5px;
-  right: 15px;
-  z-index: 5;
-  background-color: #fff;
-  padding: 10px;
-  border: 1px solid #999;
-  border: 1px solid #999;
-  text-align: center;
-  font-family: 'Roboto', 'sans-serif';
-  line-height: 30px;
-}
-
 .chosen-container {
   text-align: left;
+}
+
+#places-list {
+  height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  text-align: center;
+  margin-top: 25px;
+}
+
+.full-height{
+  height: 99%;
 }

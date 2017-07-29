@@ -1,146 +1,130 @@
 var placesRendererService = placesRendererService || {};
 
-placesRendererService.Renderer = function(mapParam, placesSearchParam, geocoderParam, infoWindowParam, placesCtl, distanceCtl, addressCtl) {
+placesRendererService.Renderer = function(mapParam, geocoderParam, infoWindowParam, placesCtl, distanceCtl, addressCtl) {
+
   var currentPositionAddress;
   var map = mapParam,
     infoWindow = infoWindowParam;
 
-  var placesSearch = placesSearchParam,
-    geocoder = geocoderParam,
-    directionsService = directionsService = new google.maps.DirectionsService();
-    directionsDisplay = new google.maps.DirectionsRenderer();
+    var geocoder = geocoderParam,
+      placesSearch = new placesServices.Search(new google.maps.places.PlacesService(map), geocoder),
+      directionsService = new google.maps.DirectionsService(),
+      directionsDisplay = new google.maps.DirectionsRenderer();
 
-  directionsDisplay.setMap(map);
-  var placesCtlId = placesCtl,
-    distanceCtlId = distanceCtl,
-    addressCtlId = addressCtl;
-  var foundPlaces = [];
+    directionsDisplay.setMap(map);
 
-  var currentPositionMarker = new google.maps.Marker({
-    position: map.center,
-    map: map
-  });
+    var placesCtlId = placesCtl,
+      distanceCtlId = distanceCtl,
+      addressCtlId = addressCtl;
 
-  currentPositionMarker.addListener('click', function () {
-    infoWindow.setContent(currentPositionAddress);
-    infoWindow.open(map, currentPositionMarker);
-  });
+    var mapView = new placesViews.MapView(map, placesSearch, infoWindow),
+      listView = new placesViews.ListView("#places-list");
 
-  google.maps.event.addListener(infoWindow, 'domready', function() {
-    document.getElementById("directionsToPlace").addEventListener("click", function(e) {
+    var currentPositionMarker = new google.maps.Marker({
+      position: map.center,
+      map: map
+    });
+
+    currentPositionMarker.addListener('click', function () {
+      infoWindow.setContent(currentPositionAddress);
+      infoWindow.open(map, currentPositionMarker);
+    });
+
+    google.maps.event.addListener(infoWindow, 'domready', function() {
+      var directionsToPlaceElement = document.getElementById("directionsToPlace");
+      if (directionsToPlaceElement) {
+        directionsToPlaceElement.addEventListener("click", function(e) {
+          directionsToPlace();
+        });
+      }
+    });
+
+    $(document).on('click', '#places-list .show-on-map', function(e) {
+      var placeIndex = e.currentTarget.getAttribute("data-marker-index");
+      mapView.selectItem(placeIndex);
+      listView.selectItem(placeIndex);
+    });
+
+    $(document).on('click', '#places-list .show-directions', function(e) {
+      var placeIndex = e.currentTarget.getAttribute("data-marker-index");
+      mapView.selectItem(placeIndex);
       directionsToPlace();
-    })
-  });
-
-  function searchPlaces(search, callbacks, placesTypes, distance) {
-    var placesTypes = $(placesCtlId).val();
-    var distance = $(distanceCtlId).val();
-
-    if (placesTypes) {
-      clearMarkers();
-
-      for (var i = 0; i < placesTypes.length; i++) {
-        var request = {
-          location: currentPositionMarker.position,
-          address: currentPositionAddress,
-          radius: distance * 1000,
-          type: placesTypes[i]
-        }
-        search(request, callbacks);
-      }
-    }
-  }
-
-  function clearMarkers() {
-    for (var i = 0; i < foundPlaces.length; i++) {
-      foundPlaces[i].setMap(null);
-    }
-    foundPlaces=[];
-  }
-
-  function createMarker(place) {
-
-    var marker = new google.maps.Marker({
-      position: place.geometry.location,
-      map: map,
-      title: place.name,
-      animation: google.maps.Animation.DROP,
-      icon: place.icon
     });
 
-    marker.addListener('click', function() {
-      placesSearch.getDetails(place.place_id, function(detailedInformation) {
-        function createInfoContent() {
-          var content = detailedInformation.name;
-          if (detailedInformation.opening_hours) {
-            content += " - (" + (detailedInformation.opening_hours.open_now ? "Open" : "Closed") + ")";
+    function searchPlaces(search, callbacks, placesTypes, distance) {
+      var placesTypes = $(placesCtlId).val();
+      var distance = $(distanceCtlId).val();
+      if (placesTypes) {
+        for (var i = 0; i < placesTypes.length; i++) {
+          var request = {
+            location: currentPositionMarker.position,
+            address: currentPositionAddress,
+            radius: distance * 1000,
+            type: placesTypes[i]
           }
-
-          content += "<br>" + detailedInformation.formatted_address + "<br><br><button id='directionsToPlace'>Directions to this place</button>";
-          return content;
+          search(request, callbacks);
         }
-
-        currentPlaceLocation = detailedInformation.geometry.location;
-        infoWindow.setContent(createInfoContent());
-        infoWindow.open(map, marker);
-      });
-    });
-    foundPlaces.push(marker);
-  }
-
-  function createMarkers(places) {
-    for (var i = 0; i < places.length; i++) {
-      createMarker(places[i]);
+      }
     }
-  }
 
-  function directionsToPlace() {
-    directionsService.route({
-      origin: currentPositionMarker.position,
-      destination: currentPlaceLocation,
-      travelMode: 'WALKING'
-    }, function(response, status) {
-      if (status == 'OK') {
-        directionsDisplay.setDirections(response);
+    function showPlaces(places) {
+      mapView.clear();
+      listView.clear();
+
+      var listContent = "";
+      for (var i = 0; i < places.length; i++) {
+        var place = places[i];
+        mapView.onFoundPlace(place, i);
+        listView.onFoundPlace(place, i);
       }
-    });
-  }
+    }
 
-  return {
-    showPlacesByLocation : function(location) {
-      var callbacks = {
-        onFoundPlaces: function(places, location) {
-          createMarkers(places);
-        }
-      }
-
-      currentPositionMarker.setPosition(location);
-      map.setCenter(location);
-      searchPlaces(placesSearch.byLocation, callbacks);
-      geocoder.geocode({'location': currentPositionMarker.getPosition()}, function (results, status) {
-        if (status === 'OK') {
-          if (results[0]) {
-            currentPositionAddress = results[0].formatted_address;
-            $(addressCtlId).val(results[0].formatted_address);
-          }
+    function directionsToPlace() {
+      directionsService.route({
+        origin: currentPositionMarker.position,
+        destination: mapView.getSelectedPlace(),
+        travelMode: 'WALKING'
+      }, function(response, status) {
+        if (status == 'OK') {
+          directionsDisplay.setDirections(response);
         }
       });
-    },
-
-    showPlacesByAddress : function() {
-      var callbacks = {
-        onGeocoded: function (location) {
-          currentPositionMarker.setPosition(location);
-          map.setCenter(location);
-        },
-
-        onFoundPlaces: function(places, location) {
-          createMarkers(places);
-        }
-      }
-
-      currentPositionAddress = $(addressCtlId).val();
-      searchPlaces(placesSearch.byAddress, callbacks);
     }
-  }
+
+    return {
+      showPlacesByLocation : function(location) {
+        var callbacks = {
+          onFoundPlaces: function(places, location) {
+            showPlaces(places);
+          }
+        }
+
+        currentPositionMarker.setPosition(location);
+        map.setCenter(location);
+        searchPlaces(placesSearch.byLocation, callbacks);
+        geocoder.geocode({'location': currentPositionMarker.getPosition()}, function (results, status) {
+          if (status === 'OK') {
+            if (results[0]) {
+              currentPositionAddress = results[0].formatted_address;
+              $(addressCtlId).val(results[0].formatted_address);
+            }
+          }
+        });
+      },
+
+      showPlacesByAddress : function() {
+        var callbacks = {
+          onGeocoded: function (location) {
+            currentPositionMarker.setPosition(location);
+            map.setCenter(location);
+          },
+          onFoundPlaces: function(places, location) {
+            showPlaces(places);
+          }
+        }
+
+        currentPositionAddress = $(addressCtlId).val();
+        searchPlaces(placesSearch.byAddress, callbacks);
+      }
+    }
 }

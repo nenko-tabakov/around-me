@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
   <title>Around Me</title>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
   <link rel="stylesheet" href="styles/style.css" type="text/css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body>
+<body class="container-fluid">
 
-  <div id="controls">
-    <label for="places">Search for</label>
-    <select id="places" multiple data-placeholder="Place types..." class="chosen-select placesControl"
+<div id="controls">
+  <label for="places">Search for</label>
+  <select id="places" multiple data-placeholder="Place types..." class="chosen-select placesControl"
     placeholder="Place types...">
   </select>
 
@@ -22,16 +25,29 @@
   <label for="distanceRadius">km around</label>
   <input type="text" placeholder="Address" class="placesControl" id="address">
   <button id="showPlaces" class="placesControl">Show</button>
+</div>
+
+<div class="row full-height">
+  <div class="col-sm-3">
+    <div id="places-list"></div>
   </div>
 
-  <div id="map"></div>
+  <div class="col-sm-9 full-height">
+    <div id="map" class="full-height"></div>
+  </div>
+</div>
 
-  <script src="https://code.jquery.com/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.js"></script>
-  <script src="scripts/places_service.js"></script>
-  <script src="scripts/places_renderer.js"></script>
-  <script src="scripts/script.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places">
-  </script>
+<script src="https://code.jquery.com/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+  integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="scripts/places_service.js"></script>
+<script src="scripts/views.js"></script>
+<script src="scripts/places_renderer.js"></script>
+<script src="scripts/script.js"></script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?callback=initMap&libraries=places"></script>
+
 </body>
 </html>

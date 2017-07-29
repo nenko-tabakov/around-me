@@ -1,4 +1,4 @@
-var placesRenderer; 
+var placesRenderer;
 
 var PLACE_TYPES = (function(){
 
@@ -128,6 +128,7 @@ var PLACE_TYPES = (function(){
 }());
 
 function initMap() {
+
   function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     infoWindow.setPosition(pos);
     infoWindow.setContent(browserHasGeolocation ?
@@ -149,35 +150,36 @@ function initMap() {
 
     var infoWindow = new google.maps.InfoWindow({map: map});
     var geocoder = new google.maps.Geocoder;
-    placesRenderer = new placesRendererService.Renderer(map, new placesServices.Search(new google.maps.places.PlacesService(map), geocoder),
-    geocoder, infoWindow, "#places", "#distanceRadius", "#address");
+    placesRenderer = new placesRendererService.Renderer(map, geocoder, infoWindow, "#places", "#distanceRadius", "#address");
 
     map.addListener('click', function (event) {
       placesRenderer.showPlacesByLocation(event.latLng);
     });
+
     // Try HTML5 geolocation.
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (position) {
-        var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        placesRenderer.showPlacesByLocation(pos);
-      }, function () {
-        handleLocationError(true, infoWindow, map.getCenter());
-      });
-    } else {
-      // Browser doesn't support Geolocation
-      handleLocationError(false, infoWindow, map.getCenter());
-    }
-  }
-  $(document).ready(function() {
-    var placesOptions = "";
-    for (var i = 0; i < PLACE_TYPES.length; i++) {
-      placesOptions += '<option value="' + PLACE_TYPES[i].id + '">' + PLACE_TYPES[i].displayName + '</option>';
-    }
-    $("#places").append(placesOptions);
-
-    $(".chosen-select").chosen();
-
-    $("#showPlaces").click(function () {
-      placesRenderer.showPlacesByAddress();
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+      placesRenderer.showPlacesByLocation(pos);
+    }, function () {
+      handleLocationError(true, infoWindow, map.getCenter());
     });
+  } else {
+    // Browser doesn't support Geolocation
+    handleLocationError(false, infoWindow, map.getCenter());
+  }
+}
+
+$(document).ready(function() {
+  var placesOptions = "";
+  for (var i = 0; i < PLACE_TYPES.length; i++) {
+    placesOptions += '<option value="' + PLACE_TYPES[i].id + '">' + PLACE_TYPES[i].displayName + '</option>';
+  }
+  $("#places").append(placesOptions);
+
+  $(".chosen-select").chosen();
+
+  $("#showPlaces").click(function () {
+    placesRenderer.showPlacesByAddress();
   });
+});
